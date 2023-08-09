@@ -21,8 +21,9 @@ async function validateUserId(req, res, next) {
       next()
     }
   } catch (err) {
-    next(err)
-    
+    res.status(500).json({
+      message: 'problem finding user',
+    })
   }
 }
 
@@ -31,7 +32,7 @@ async function validateUserId(req, res, next) {
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
   const { name } = req.body
-  if(!name || name.trim()) {
+  if(!name || !name.trim()) {
     res.status(400).json({
       message: 'missing required name field'
     })
@@ -45,9 +46,9 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
   const {text } = req.body
-  if(!text || text.trim()) {
+  if(!text || !text.trim()) {
     res.status(400).json({
-      message: 'missing required name field'
+      message: 'missing required text field'
     })
   } else {
     req.text = text.trim()
@@ -61,5 +62,5 @@ module.exports = {
   logger,
   validateUserId,
   validateUser,
-  validatePost
+  validatePost,
 }
