@@ -11,27 +11,29 @@ const {
 } = require('../middleware/middleware')
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   // RETURN AN ARRAY WITH ALL THE USERS
   Users.get()
     .then(users => {
-      res.status(200).json(users);
+      res.json(users);
     })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({ message: 'Error retrieving users' });
-    });
+    .catch(next)
 });
 
 router.get('/:id', validateUserId, (req, res) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
-  res.status(200).json(req.user);
+  res.json(req.user);
 });
 
-router.post('/', validateUser, (req, res) => {
+router.post('/', validateUser, (req, res, next) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
+  Users.insert({ name: req.name})
+  .then(newUser => {
+    res.status(201).json(newUser)
+  })
+  .catch(next)
 });
 
 router.put('/:id', validateUserId, validateUser, (req, res) => {
@@ -55,6 +57,14 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
 });
+
+router.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    customMessage: 'something inside posts router happened',
+    message: err.message,
+    stack: err.stack,
+  })
+})
 
 // do not forget to export the router
 module.exports = router;
